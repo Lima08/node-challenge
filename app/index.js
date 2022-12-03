@@ -12,11 +12,17 @@ const config = {
 
 const PORT = 3000;
 const connection = mysql.createConnection(config);
+const createTable = `
+CREATE TABLE if not exists people (
+    id SMALLINT NOT NULL AUTO_INCREMENT,
+    name CHAR(30) NOT NULL,
+    PRIMARY KEY (id));`;
 
+connection.query(createTable);
 const getNames = 'SELECT name FROM `people`';
 const insertName = (name) => `INSERT INTO \`people\` (name) VALUES ("${name}")`;
-
 const header = '<h1>Full Cycle Rocks!</h1>';
+
 const message = (nameList) => `
     ${header}
     <ul>
@@ -28,17 +34,19 @@ const message = (nameList) => `
 
 function createListName(err, people) {
     if (err) {
-        return console.error(err);
+        return console.log(err);
     }
 
     return people.map(({ name }) => name);
 }
 
 app.use(cors());
+
 app.get('/', (_, res) => {
-    connection.query(insertName('Usuário'), (error, result) => {
+    connection.query(insertName('Usuário'), () => {
         connection.query(getNames, (err, people) => {
             const nameList = createListName(err, people);
+
             res.send(message(nameList));
         });
     });
