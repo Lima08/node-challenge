@@ -14,13 +14,11 @@ services:
         environment:
             - MYSQL_DATABASE=users
             - MYSQL_ROOT_PASSWORD=root
-        volumes:
-            - ./mysql/data:/var/lib/mysql
         user: root
         networks:
             - node-network
-        expose:
-            - 3306
+        ports:
+            - "3306"
 
     app:
         container_name: app
@@ -31,18 +29,17 @@ services:
             - node-network
         entrypoint: dockerize -wait tcp://db:3306 --timeout 20s docker-entrypoint.sh
         command: npm start
-        volumes:
-            - ./app:/usr/src/app
         depends_on:
             - db
+        ports:
+            - "3000"
 
     nginx:
         build:
             context: ./nginx
         container_name: nginx
-        restart: always
         ports:
-            - '8080:8080'
+            - "8080:8080"
         depends_on:
             - db
             - app
